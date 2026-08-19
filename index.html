@@ -210,8 +210,12 @@ let musicOn = true, sfxOn = true;
 let padNodes = null;
 
 function ensureAudio(){
-  if(audioCtx) return;
+  if(audioCtx){
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    return;
+  }
   audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state === 'suspended') audioCtx.resume();
   masterGain = audioCtx.createGain(); masterGain.gain.value = 0.9; masterGain.connect(audioCtx.destination);
   musicGain = audioCtx.createGain(); musicGain.gain.value = 0.25; musicGain.connect(masterGain);
   sfxGain = audioCtx.createGain(); sfxGain.gain.value = 0.5; sfxGain.connect(masterGain);
@@ -798,6 +802,9 @@ document.getElementById('resetBtn').addEventListener('click', ()=>{
 });
 
 window.addEventListener('resize', ()=>{ setCanvasSize(); });
+document.addEventListener('visibilitychange', ()=>{
+  if(!document.hidden && audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+});
 
 /* ============ BOOT ============ */
 function start(){
