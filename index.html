@@ -58,7 +58,9 @@
     transition:opacity .3s ease; }
 
   /* ---- signature tension / position bar ---- */
-  #tensionWrap{ position:absolute; left:14px; right:14px; bottom:96px; z-index:5; }
+  #bottomStack{ position:absolute; left:14px; right:14px; bottom:14px; z-index:5;
+    display:flex; flex-direction:column; gap:10px; }
+  #tensionWrap{ position:relative; }
   #tensionMeter{ position:relative; height:10px; border-radius:6px; background:rgba(255,255,255,.08);
     overflow:visible; border:1px solid rgba(255,255,255,.12); }
   #tensionFill{ height:100%; width:0%; border-radius:6px; background:linear-gradient(90deg,var(--accent2),var(--accent));
@@ -70,7 +72,7 @@
   #tensionCaption{ font-size:10px; color:var(--muted); text-align:center; margin-top:6px; letter-spacing:.08em; text-transform:uppercase; }
 
   /* ---- roster cards ---- */
-  #roster{ position:absolute; left:10px; right:10px; bottom:14px; z-index:5;
+  #roster{ position:relative;
     display:flex; gap:6px; justify-content:center; flex-wrap:wrap; }
   .rcard{ background:rgba(15,21,36,.85); border:1px solid rgba(255,255,255,.08); border-radius:10px;
     padding:6px 8px; min-width:64px; text-align:center; opacity:0; transform:translateY(14px);
@@ -135,12 +137,13 @@
     <div id="phaseLabel"></div>
     <div id="commentary"></div>
 
-    <div id="tensionWrap">
-      <div id="tensionMeter"><div id="tensionFill"></div></div>
-      <div id="tensionCaption"></div>
+    <div id="bottomStack">
+      <div id="tensionWrap">
+        <div id="tensionMeter"><div id="tensionFill"></div></div>
+        <div id="tensionCaption"></div>
+      </div>
+      <div id="roster"></div>
     </div>
-
-    <div id="roster"></div>
     <div id="leaderboardPanel"><h3>Session Standings</h3><div id="lbBody"></div></div>
     <div id="winnerBanner"><div class="tag">Winner</div><div class="wname" id="wname"></div></div>
   </div>
@@ -731,8 +734,12 @@ function loop(now){
 
   if(phase==='race') updateRace(elapsed, d, dSec);
   updateTensionBar(phase, elapsed, d);
-  const secs = Math.max(0, Math.ceil(d-elapsed));
-  setStageBadge(secs+'s', secs<=3);
+  if(phase==='race'){
+    setStageBadge(`LAP ${currentLeaderLap}/${LAPS}`, false);
+  } else {
+    const secs = Math.max(0, Math.ceil(d-elapsed));
+    setStageBadge(secs+'s', secs<=3);
+  }
   drawTrack();
   updateDrawConfetti();
 
