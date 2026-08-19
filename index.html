@@ -484,10 +484,12 @@ function enterPhase(phase){
     finishCounter = 0;
     lastAnnouncedLap = 0;
     racers.forEach(r=>{ r.finished=false; r.finishOrder=0; r.lastLap=0; });
+    setupRaceDots();
     setCommentary(`Three laps — they're off!`);
   }
   if(phase==='finish'){
     timeScale = 0.32;
+    clearRaceDots();
     setCommentary(`Photo finish!`);
   }
   if(phase==='reveal'){
@@ -692,9 +694,25 @@ function drawTrack(){
   });
 }
 
+let raceDotEls = [];
+function clearRaceDots(){
+  raceDotEls.forEach(el=>el.remove());
+  raceDotEls = [];
+}
+function setupRaceDots(){
+  clearRaceDots();
+  const wrap = document.getElementById('tensionMeter');
+  racers.forEach(r=>{
+    const dot = document.createElement('div');
+    dot.className = 'posDot';
+    dot.style.background = r.color;
+    dot.style.left = '0%';
+    wrap.appendChild(dot);
+    raceDotEls.push(dot);
+  });
+}
 function updateTensionBar(phase, elapsed, d){
   const fill = document.getElementById('tensionFill');
-  const wrap = document.getElementById('tensionMeter');
   if(phase==='betting'){
     fill.style.width = `${(elapsed/d)*100}%`;
     const remaining = Math.ceil(d-elapsed);
@@ -702,13 +720,9 @@ function updateTensionBar(phase, elapsed, d){
     document.getElementById('tensionCaption').textContent = `Guessing closes in ${Math.max(0,remaining)}s`;
   }
   if(phase==='race'){
-    Array.from(wrap.querySelectorAll('.posDot')).forEach(n=>n.remove());
-    racers.forEach(r=>{
-      const dot = document.createElement('div');
-      dot.className = 'posDot';
-      dot.style.left = `${Math.min(100,r.progress*100)}%`;
-      dot.style.background = r.color;
-      wrap.appendChild(dot);
+    racers.forEach((r,i)=>{
+      const dot = raceDotEls[i];
+      if(dot) dot.style.left = `${Math.min(100,r.progress*100)}%`;
     });
     fill.style.width = '0%';
     document.getElementById('tensionCaption').textContent = 'Live positions';
