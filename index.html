@@ -439,7 +439,7 @@ function pickTickerLines(){
 }
 
 function enterPhase(phase){
-  phaseStart = audioCtx ? audioCtx.currentTime : performance.now()/1000;
+  phaseStart = performance.now()/1000;
   lastTickSecond = -1;
   document.getElementById('phaseLabel').textContent = PHASE_LABELS[phase] || phase.toUpperCase();
   const tensionFill = document.getElementById('tensionFill');
@@ -720,7 +720,7 @@ function updateTensionBar(phase, elapsed, d){
 let lastFrameT = null;
 function loop(now){
   requestAnimationFrame(loop);
-  const t = audioCtx ? audioCtx.currentTime : now/1000;
+  const t = now/1000;
   if(lastFrameT===null) lastFrameT = t;
   const dSec = Math.min(0.05, t-lastFrameT);
   lastFrameT = t;
@@ -807,7 +807,10 @@ document.addEventListener('visibilitychange', ()=>{
 });
 
 /* ============ BOOT ============ */
+let started = false;
 function start(){
+  if(started) return;
+  started = true;
   ensureAudio();
   setCanvasSize();
   generateTrack();
